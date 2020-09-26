@@ -1,34 +1,51 @@
 using System;
 using System.Diagnostics;
 
-class Checker
+internal class Checker
 {
-    static bool vitalsAreOk(float bpm, float spo2, float respRate) {
-        if(bpm < 70 || bpm > 150) {
-            return false;
-        } else if(spo2 < 90) {
-            return false;
-        } else if(respRate < 30 || respRate > 95) {
-            return false;
-        }
-        return true;
+    //Convection followed: lower, upper
+    private readonly int[] _spo2Limits  = new int[] {90 , 100};
+    private readonly int[] _respRateLimits = new int[] {30 , 95};
+    private readonly int[] _bpmLimits = new int[] {70 , 150};
+
+    public bool CheckVitals(float bpm, float spo2, float respRate)
+    {
+        return (
+            CheckIfInLimits(_spo2Limits[0], _spo2Limits[1], spo2, "spo2") && 
+            CheckIfInLimits(_respRateLimits[0], _respRateLimits[1], respRate, "RespRate") &&
+            CheckIfInLimits(_bpmLimits[0], _bpmLimits[1], bpm, "BPM") );
+
     }
-    static void ExpectTrue(bool expression) {
-        if(!expression) {
-            Console.WriteLine("Expected true, but got false");
-            Environment.Exit(1);
-        }
+
+    private bool CheckIfInLimits(float lowerLimit, float upperLimit, float value, string parameter)
+    {
+        if (!(value > upperLimit) && !(value < lowerLimit)) return true;
+        System.Console.WriteLine("Warning!!!!" + parameter + " value is out of range!" + parameter +" = " + value);
+        return false;
     }
-    static void ExpectFalse(bool expression) {
-        if(expression) {
-            Console.WriteLine("Expected false, but got true");
-            Environment.Exit(1);
-        }
-    }
-    static int Main() {
-        ExpectTrue(vitalsAreOk(100, 95, 60));
-        ExpectFalse(vitalsAreOk(40, 91, 92));
-        Console.WriteLine("All ok");
+
+    public static int Main() 
+    {
+        var obj = new  Checker();
+        Debug.Assert( obj.CheckVitals(75,99,65) == true);
+        
+        //BPM out of range
+        Debug.Assert( obj.CheckVitals(60,99,65) == false);
+        Debug.Assert( obj.CheckVitals(10,99,65) == false);
+
+        //SpO2 out of range
+        Debug.Assert(obj.CheckVitals(75, 80,65) == false);
+        Debug.Assert(obj.CheckVitals(75, 110,65) == false);
+
+        // Respiratory Rate out of range
+        Debug.Assert(obj.CheckVitals(75,99,20));
+        Debug.Assert(obj.CheckVitals(75,99,100));
+
+        Debug.Assert(obj.CheckIfInLimits(10,100,20,"Check1") == true);
+        Debug.Assert(obj.CheckIfInLimits(12.3f, 15.4f, 12.299f, "Check2") == false);
+
+        System.Console.WriteLine("Reached the end, all tests passing");
         return 0;
     }
 }
+
