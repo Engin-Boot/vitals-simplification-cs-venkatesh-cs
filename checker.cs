@@ -11,17 +11,23 @@ internal class Checker
     public bool CheckVitals(float bpm, float spo2, float respRate)
     {
         return (
-            CheckIfInLimits(_spo2Limits[0], _spo2Limits[1], spo2, "spo2") && 
-            CheckIfInLimits(_respRateLimits[0], _respRateLimits[1], respRate, "RespRate") &&
-            CheckIfInLimits(_bpmLimits[0], _bpmLimits[1], bpm, "BPM") );
+            IsVitalInLimits(_spo2Limits[0], _spo2Limits[1], spo2, "spo2") && 
+            IsVitalInLimits(_respRateLimits[0], _respRateLimits[1], respRate, "RespRate") &&
+            IsVitalInLimits(_bpmLimits[0], _bpmLimits[1], bpm, "BPM") );
 
     }
 
-    private bool CheckIfInLimits(float lowerLimit, float upperLimit, float value, string parameter)
+    private bool IsVitalInLimits(float lowerLimit, float upperLimit, float value, string parameter)
     {
         if (!(value > upperLimit) && !(value < lowerLimit)) return true;
-        System.Console.WriteLine("Warning!!!!" + parameter + " value is out of range!" + parameter +" = " + value);
+        string warningMessage = "Warning!!!!" + parameter + " value is out of range!" + parameter + " = " + value;
+        Warn(warningMessage);
         return false;
+    }
+
+    private void Warn(string warningMessage)
+    {
+        Console.WriteLine(warningMessage);
     }
 
     public static int Main() 
@@ -41,8 +47,8 @@ internal class Checker
         Debug.Assert(obj.CheckVitals(75,99,20));
         Debug.Assert(obj.CheckVitals(75,99,100));
 
-        Debug.Assert(obj.CheckIfInLimits(10,100,20,"Check1") == true);
-        Debug.Assert(obj.CheckIfInLimits(12.3f, 15.4f, 12.299f, "Check2") == false);
+        Debug.Assert(obj.IsVitalInLimits(10,100,20,"Check1") == true);
+        Debug.Assert(obj.IsVitalInLimits(12.3f, 15.4f, 12.299f, "Check2") == false);
 
         System.Console.WriteLine("Reached the end, all tests passing");
         return 0;
